@@ -65,6 +65,16 @@ textarea{min-height:56px;resize:vertical}
 .lvh{display:flex;align-items:center;gap:10px}.lvh img{width:52px;height:auto;flex:none}
 .mbox .pj{display:block;width:90px;margin:0 auto 6px}
 .empty{display:flex;flex-direction:column;align-items:center;gap:6px}.empty img{width:90px;opacity:.9}
+@keyframes mp-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes mp-wag{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+@keyframes mp-hop{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-14px) rotate(-4deg)}}
+@keyframes mp-wig{0%,90%,100%{transform:rotate(0)}93%{transform:rotate(-12deg)}96%{transform:rotate(12deg)}}
+.hero .main{animation:mp-bob 1.8s ease-in-out infinite}
+.hero .side:first-child{animation:mp-wag 1.4s ease-in-out infinite;transform-origin:50% 90%}
+.hero .side:last-child{animation:mp-hop 1.6s ease-in-out infinite}
+.bank .pig{display:inline-block;animation:mp-wig 3s ease-in-out infinite}
+.empty img{animation:mp-wag 1.6s ease-in-out infinite;transform-origin:50% 90%}
+@media (prefers-reduced-motion:reduce){.hero img,.bank .pig,.empty img{animation:none}}
 </style></head><body><div id="conf"></div><div class="modal" id="modal" hidden><div class="mbox" id="mbox" role="dialog" aria-modal="true"></div></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="wrap">
 <div class="hero"><img class="side" data-img="cuac" src="" alt="Don Cuac"><div class="ttl"><img class="main" data-img="vane_det" src="" alt="Pochita"></div><img class="side" data-img="gordo" src="" alt="Gordo"></div><h1>🔐 PANEL DE KIBUTOSKI</h1>
