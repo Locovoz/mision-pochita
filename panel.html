@@ -104,7 +104,7 @@ async function backend(role) {
     listen(f, onErr) { return F.onSnapshot(F.collection(db, "fotos"), snap => { const d = {}; snap.forEach(x => d[x.id] = x.data()); f(d); }, e => onErr && onErr(e)); },
     async put(id, data) { await F.setDoc(F.doc(db, "fotos", id), { ...data, ts: Date.now() }); },
     async decide(id, patch) { await F.updateDoc(F.doc(db, "fotos", id), { ...patch, decidedAt: Date.now() }); },
-    async signInAdmin() { const r = await A.signInWithPopup(auth, new A.GoogleAuthProvider()); user = r.user; return user; },
+    async signInAdmin() { if (user && user.isAnonymous) await A.signOut(auth); const r = await A.signInWithPopup(auth, new A.GoogleAuthProvider()); user = r.user; return user; },
     user: () => user };
 }
 const money = n => "$" + Math.round(n || 0).toLocaleString("es-CO");
@@ -158,7 +158,7 @@ async function start() { api.listen(onData, err => { document.getElementById("ap
 (async () => {
   try { api = await backend("admin"); document.getElementById("demo").hidden = !api.demo;
     const lg = document.getElementById("login"); if (lg) lg.onclick = async () => { try { await api.signInAdmin(); start(); } catch (e) { toast("No se pudo iniciar sesión."); } };
-    if (api.demo || api.user()) start();
+    if (api.demo || (api.user() && !api.user().isAnonymous)) start();
   } catch (e) { document.getElementById("app").innerHTML = `<p class="lead">🔴 No me pude conectar.</p>`; }
 })();
 </script></body></html>
