@@ -192,18 +192,19 @@ function ruleText() { const r = document.getElementById("rule"); if (!missionDay
   r.className = "rule bad"; r.innerHTML = `⌛ <b>La misión era el ${pretty(missionDay)}.</b> Pídele a Kibutoski otra oportunidad.`; }
 async function handle(inp) {
   const f = inp.files[0]; inp.value = ""; if (!f || !current || busy) return;
-  const t0 = today(); if (missionDay && missionDay !== t0) { toast("⌛ El día de la misión ya pasó."); return; }
-  const day = (await photoDay(f)).day; if (!day) { toast("🕵️ No pude leer la fecha. Usa el botón 📷 Cámara."); return; }
-  if (day !== t0) { toast(`🚫 Esa foto es del ${pretty(day)}, no de hoy. ¡Kibutoski revisó los metadatos!`); return; }
+  const t0 = today(), fromCam = inp.id === "cam";
+  if (missionDay && missionDay !== t0) { const any = Object.keys(D).length; if (!any) { missionDay = t0; localStorage.setItem(DAYK, t0); } else { showModal(`<h3>⌛ El día de la misión ya pasó</h3><p>Tu misión empezó el ${pretty(missionDay)}. Pídele a Kibutoski que te la reinicie.</p><div class="row" style="justify-content:center"><button class="btn" data-close>Ok</button></div>`); return; } }
+  if (!fromCam) { const pd = await photoDay(f); if (pd.day && pd.day !== t0) { showModal(`<h3>🚫 Esa foto no es de hoy</h3><p>Kibutoski revisó los datos de la foto: es del <b>${pretty(pd.day)}</b>. En esta misión solo valen fotos tomadas hoy.</p><p><b>Tip:</b> usa el botón <b>📷 Cámara</b> para tomarla en el momento.</p><div class="row" style="justify-content:center"><button class="btn" data-close>Entendido</button></div>`); return; } }
   busy = true; const id = current, R = retoDe(id);
   showModal(`<img class="pj" src="${IMG.vane_det}" alt=""><h3>📷 Analizando tu foto…</h3><p>Revisando luz, enfoque y encuadre.</p>`);
   try {
-    let img = await shrink(f, 900); if (img.length > 900000) img = await shrink(f, 700);
+    let img; try { img = await shrink(f, 900); } catch (e2) { throw Object.assign(new Error("No pude abrir esa foto (formato). Intenta tomarla con el botón Cámara."), { code: "formato" }); }
+    if (img.length > 900000) img = await shrink(f, 700);
     const sc = await localJudge(img, R.t), propuesta = valorDe(sc);
     if (!missionDay) { missionDay = t0; localStorage.setItem(DAYK, t0); }
     await api.put(id, { img, reto: R.t, propuesta, comentario: sc.comentario, scores: { composicion: sc.composicion, luz: sc.luz, enfoque: sc.enfoque, creatividad: sc.creatividad }, estado: "pendiente", valor: 0, nota: "", dia: t0 });
     showModal(`<h3>📤 ¡Enviada a Kibutoski!</h3><img src="${img}" alt=""><p class="judge">“${sc.comentario}”</p><p style="text-align:center;font-weight:800">El análisis técnico sugiere <b>${money(propuesta)}</b>.<br>Ahora Kibutoski la evalúa y decide el precio final. Te va a aparecer aquí solita. ⏳</p><div class="row" style="justify-content:center"><button class="btn" data-close>Ok, espero</button></div>`);
-  } catch (e) { closeModal(); toast("No se pudo enviar. Revisa tu internet e intenta otra vez 🙏"); }
+  } catch (e) { const code = (e && (e.code || e.name)) || "error"; showModal(`<h3>😿 No se pudo enviar</h3><p>Revisa tu internet e intenta otra vez. Si sigue fallando, mándale a Kibutoski una captura de este mensaje.</p><p style="font-size:12px;color:var(--muted)">Código: ${esc(String(code))}${e && e.message ? " · " + esc(String(e.message).slice(0, 120)) : ""}</p><div class="row" style="justify-content:center"><button class="btn" data-close>Ok</button></div>`); }
   busy = false;
 }
 document.getElementById("gal").addEventListener("change", e => handle(e.target));
@@ -250,7 +251,7 @@ function onData(d) {
   render();
   try { api = await backend("agente"); document.getElementById("demo").hidden = !api.demo; document.getElementById("st").textContent = api.demo ? "🧪 Demo" : "🟢 Conectada";
     api.listen(onData, () => { document.getElementById("st").textContent = "🔴 Sin conexión"; }); }
-  catch (e) { document.getElementById("st").textContent = "🔴 Sin conexión"; toast("No me pude conectar. Revisa tu internet."); }
+  catch (e) { document.getElementById("st").textContent = "🔴 Sin conexión"; showModal(`<h3>🔴 No me pude conectar</h3><p>Revisa tu internet y vuelve a abrir la página. Si usas iPhone, ábrela en <b>Safari</b> normal (no en modo privado) o en <b>Chrome</b>.</p><p style="font-size:12px;color:var(--muted)">Código: ${esc(String((e && (e.code || e.message)) || "error").slice(0, 120))}</p><div class="row" style="justify-content:center"><button class="btn" onclick="location.reload()">Reintentar</button></div>`); }
 })();
 </script><button class="mp-music off" id="mpMusic" aria-label="Música">🎵</button>
 <script>

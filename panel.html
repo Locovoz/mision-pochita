@@ -217,4 +217,17 @@ async function start() { api.listen(onData, err => { document.getElementById("ap
   (function loop(){setTimeout(function(){if(started&&!document.hidden&&document.getElementById("modal")&&document.getElementById("modal").hidden){var ks=["gordo","max","cuac","pochita"],k=ks[Math.floor(Math.random()*ks.length)],el=find(k);if(el&&who(el)===k)act(k,el);}loop();},25000+Math.random()*25000);})();
 })();
 </script>
+<button id="mpDl" style="position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:45;border:0;border-radius:999px;padding:12px 16px;background:#16895B;color:#fff;font:800 14px ui-rounded,system-ui,sans-serif;box-shadow:0 4px 0 #0E5C3C;cursor:pointer">📥 Descargar fotos aprobadas</button>
+<script>
+document.getElementById("mpDl").onclick=async function(){
+  var sec=[].slice.call(document.querySelectorAll(".sec")).find(function(s){var h=s.querySelector("h2");return h&&h.textContent.indexOf("Aprobadas")>-1;});
+  if(!sec){alert("Todavía no hay fotos aprobadas.");return;}
+  var items=[].slice.call(sec.querySelectorAll(".mini > div"));
+  for(var i=0;i<items.length;i++){var img=items[i].querySelector("img"),t=(items[i].innerText||"").split("\n").map(function(x){return x.trim();}).filter(Boolean)[0]||"foto";
+    var name=String(i+1).padStart(2,"0")+"-"+t.normalize("NFD").replace(/[^\w ]/g,"").trim().replace(/\s+/g,"-").toLowerCase().slice(0,40)+".jpg";
+    var a=document.createElement("a");a.href=img.src;a.download=name;document.body.appendChild(a);a.click();a.remove();
+    await new Promise(function(r){setTimeout(r,500);});}
+  alert("Listo: "+items.length+" fotos descargadas.");
+};
+</script>
 </body></html>
