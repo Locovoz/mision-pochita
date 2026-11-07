@@ -183,7 +183,7 @@ const CRIT = [["composicion", "Composición"], ["luz", "Luz"], ["enfoque", "Enfo
 function valorDe(sc) { const avg = CRIT.reduce((a, [k]) => a + Math.max(0, Math.min(10, +sc[k] || 0)), 0) / CRIT.length; return Math.max(500, Math.min(7000, Math.round((500 + Math.pow(avg / 10, 1.35) * 6500) / 500) * 500)); }
 function shrink(file, max) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => { const img = new Image(); img.onload = () => { const k = Math.min(1, max / Math.max(img.width, img.height)); const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL("image/jpeg", .7)); }; img.onerror = rej; img.src = r.result; }; r.onerror = rej; r.readAsDataURL(file); }); }
 let api, D = {}, prev = null, current = null, busy = false;
-const DAYK = "mp-dia-mision"; let missionDay = localStorage.getItem(DAYK);
+const DAYK = "mp-dia-mision"; let missionDay = localStorage.getItem(DAYK); if (missionDay !== today()) { missionDay = today(); try { localStorage.setItem(DAYK, missionDay); } catch (e) {} }
 const ok = id => D[id] && D[id].estado === "aprobada";
 const doneIn = li => LEVELS[li].items.filter((_, i) => ok(`${li}-${i}`)).length;
 const unlocked = li => li === 0 || doneIn(li - 1) >= 4;
